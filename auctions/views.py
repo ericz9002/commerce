@@ -3,12 +3,17 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from .forms import ListingForm
 
-from .models import User
+from .models import User, Listing, Bid, Comment, Category
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    print(Listing.objects.all())
+    return render(request, "auctions/index.html", {
+        "listings": Listing.objects.all()
+    })
 
 
 def login_view(request):
@@ -56,8 +61,39 @@ def register(request):
         except IntegrityError:
             return render(request, "auctions/register.html", {
                 "message": "Username already taken."
-            })
+            }) 
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+@login_required 
+def create_listing(request):
+    print(f"in create_listing, request.method is {request.method}")
+    if request.method == "POST":
+        print("in post")
+        form = ListingForm(request.POST)
+        if form.is_valid():
+            print("form is valid")
+            print(f"cleaned data is {form.cleaned_data}")
+            listing = Listing()
+            listing.title = form.cleaned_data["title"]
+            listing.description = form.cleaned_data["description"]
+            listing.price = form.cleaned_data["price"]
+            listing.image = form.cleaned_data["image"]
+            listing.creator = request.user
+            listing.save()
+            for str_category in form.cleaned_data["category"]:
+                category = Category.objects.get(name=str_category)
+                listing.category.add(category)
+
+            return render(request, "auctions/create-listing.html", {"ListingForm": ListingForm()})
+        else:
+            print("form is invalid")
+            print("form.errors", form.errors)
+            return render(request, "auctions/create-listing-error.html", {"ListingForm": form})
+    else:
+        return render(request, "auctions/create-listing.html", {"ListingForm": ListingForm()})
+
+def watchlist(request, username):
+    return HttpResponse("watchlist")

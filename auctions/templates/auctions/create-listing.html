@@ -1,0 +1,24 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<script>
+    $(document).ready(function() {
+        // Initialize Select2 on the category field
+        $('.category').select2({
+            placeholder: "Select categories",
+            allowClear: true
+        });
+    });
+</script>
+<form action="{% url 'create_listing' %}" method="POST">
+    {% csrf_token %}
+    {% for field in ListingForm %}
+        <div class = "form-group">
+            {{field}}
+        </div>
+    {% endfor %}
+    <input type="submit" class="btn btn-primary">
+</form>
+
+{% endblock %}

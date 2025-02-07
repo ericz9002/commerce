@@ -1,0 +1,57 @@
+.listings{
+    margin-top: 20px;
+    list-style: none;
+}
+
+.listing-header{
+    display:flex;
+}
+
+.listing-title{
+    flex:1;
+}
+
+.add-icon{
+    height:20px;
+    width:auto;
+}
+.add-to-watchlist{
+    display:flex;
+    flex-direction: row-reverse;
+    flex:1;
+}
+
+.listing-body{
+    margin-bottom: 20px;
+    display:flex;
+    flex-direction:row;
+    min-height:200px;
+    align-items: center;
+}
+
+.listing-image{
+    flex:1;
+}
+
+.listing-image img{
+    max-width:400px;
+    width: 100%;
+    height: auto;
+}
+
+.listing-info{
+    flex:1;
+    box-sizing: border-box;
+}
+
+.listing-row{
+    display:flex;
+}
+
+.listing-info-label{
+    width:130px;
+}
+
+.listing-info-value{
+    flex:1;
+}
