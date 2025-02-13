@@ -1,12 +1,17 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .forms import ListingForm
-
+from .forms import ListingForm, CommentForm
+from django.shortcuts import get_object_or_404
+import json
+from django.http import JsonResponse
 from .models import User, Listing, Bid, Comment, Category
+import pdb
+from .serializers import ListingSerializer
+from rest_framework.renderers import JSONRenderer
 
 
 def index(request):
@@ -71,11 +76,8 @@ def register(request):
 def create_listing(request):
     print(f"in create_listing, request.method is {request.method}")
     if request.method == "POST":
-        print("in post")
-        form = ListingForm(request.POST)
+        form = ListingForm(request.POST, user=request.user)
         if form.is_valid():
-            print("form is valid")
-            print(f"cleaned data is {form.cleaned_data}")
             listing = Listing()
             listing.title = form.cleaned_data["title"]
             listing.description = form.cleaned_data["description"]
@@ -87,13 +89,72 @@ def create_listing(request):
                 category = Category.objects.get(name=str_category)
                 listing.category.add(category)
 
-            return render(request, "auctions/create-listing.html", {"ListingForm": ListingForm()})
+            return HttpResponseRedirect(reverse("index"))
         else:
-            print("form is invalid")
-            print("form.errors", form.errors)
-            return render(request, "auctions/create-listing-error.html", {"ListingForm": form})
+            print(f"form.errors is {form.errors}")
+            return render(request, "auctions/create-listing.html", {"ListingForm": form})
     else:
         return render(request, "auctions/create-listing.html", {"ListingForm": ListingForm()})
+    
+def listing(request, username, title):
+    listing = get_object_or_404(Listing, title=title, creator__username=username)
+    serialized_listing = ListingSerializer(listing)
+    #serialized_listing = JSONRenderer().render(serialized_listing.data)
+    serialized_listing = json.dumps(serialized_listing.data)
+    comments = Comment.objects.filter(listing=listing)
+    if request.method == "POST":
+        pass
+        # form = CommentForm(request.POST)
+        # if form.is_valid():
+        #     comment = Comment()
+        #     comment.comment = form.cleaned_data["comment"]
+        #     comment.author = request.user
+        #     comment.listing = listing
+        #     comment.save()
+        #     print('saved object')
+        #     return render(request, "auctions/listing.html", {
+        #     "listing": serialized_listing, "comments":comments, "CommentForm": CommentForm(), "user": request.user
+        # })
+        # return render(request, "auctions/test.html", {"form": form})
+    else:
+        print(f"serialized_listing is of type {type(serialized_listing)} and has value {serialized_listing}")
+        return render(request, "auctions/listing.html", {
+            "listing":listing, "serialized_listing": serialized_listing, "comments":comments, "CommentForm": CommentForm(), "user":request.user
+        })
+    
+def add_comment(request):
+    try:
+        data = json.loads(request.body)  # Parse JSON body
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    form = CommentForm(data)
+    if form.is_valid():
+        comment = Comment()
+        comment.comment = form.cleaned_data["comment"]
+        comment.author = request.user
+        listing = Listing.objects.get(title=data['listing']['title'], creator=data['listing']['creator'])
+        comment.listing = listing
+        comment.save()
+        print('saved comment')
+        html = render(request, "auctions/comment-layout.html", {"comment": comment})
+        return html
+    else:
+        print(f"form.errors is {form.errors}")
+        return render(request, "auctions/test.html", {"form":form})
+
+def delete_comment(request):
+    try:
+        data = json.loads(request.body)  # Parse JSON body
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    id = data['comment_id']
+    comment = Comment.objects.get(id=id)
+    if request.user == comment.author:
+        comment.delete()
+        return JsonResponse({"comment_id": id, "message": "Comment deleted successfully."}, status=200)
+    else:
+        return JsonResponse({"error": "You are not authorized to delete this comment."}, status=403)
+    
 
 def watchlist(request, username):
     return HttpResponse("watchlist")

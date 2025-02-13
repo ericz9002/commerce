@@ -1,0 +1,15 @@
+{% load static %}
+<div class="comment" id="comment-{{comment.id}}">
+    <div class="comment-header">
+        <h5>{{comment.author}}</h5>
+        <h6>{{comment.date}}</h6>
+        <div class="fill"></div>
+        <input type="hidden" class="csrf-token" value="{{csrf_token}}">
+        {% if comment.author == user %}
+            <img src="{%static 'auctions/gray_x.png'%}" class="delete-comment icon" alt="delete comment" draggable="false">
+        {%endif%}
+    </div>
+    <div class="comment-body">
+        <p>{{comment.comment}}</p>
+    </div>
+</div>

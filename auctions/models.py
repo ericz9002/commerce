@@ -3,7 +3,6 @@ from django.db import models
 
 
 class User(AbstractUser):
-    #username = models.CharField(max_length=64, primary_key=True, unique=True)
     watchList = models.ManyToManyField('Listing', related_name="users")
 
 class User2(models.Model):
@@ -29,6 +28,11 @@ class Listing(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['creator', 'title'], name='unique_title_per_user'),
+        ]
+
     def __str__(self):
         return f"creator: {self.creator}, title: {self.title}, category: {self.category}, description: {self.description}, price: {self.price}, image: {self.image}, date: {self.date}, is_active: {self.is_active}"
 
@@ -41,7 +45,7 @@ class Bid(models.Model):
 
 class Comment(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     comment = models.TextField()
     date = models.DateTimeField(auto_now_add=True)

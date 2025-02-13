@@ -1,0 +1,62 @@
+{% load static %}
+{% load custom_filters %}
+<div class = "listing-ele">
+    <div class = "listing-header">
+        <div class="listing-title">
+            {% if link %}
+                <h3><a href="{%url 'listing' listing.creator listing.title%}">{{listing.title}}</a></h3>
+            {% else %}
+                <h3>{{listing.title}}</h3>
+            {% endif %}
+        </div>
+        <div class="header-buttons">
+            <button>
+                <img src = "{% static 'auctions/green-add.png' %}" class = 'icon'>
+                Add to Watchlist
+            </button>
+            <button>
+                Place bid
+            </button>
+        </div>
+    </div>
+    <div class="listing-description">
+        <p>Description: {{listing.description}}</p>
+    </div>
+    <div class="listing-body">
+        <div class = "listing-image">
+            {% if link %}
+                <a href="{%url 'listing' listing.creator listing.title%}">
+                    <img src="{{listing.image}}" alt="image not found">
+                </a>
+            {% else %}
+                <img src="{{listing.image}}" alt="image not found">
+            {% endif %}
+        </div>
+        <div class = "listing-info">
+            <div class = "listing-row">
+                <div class="listing-info-label">
+                    <h5>Author:</h5>
+                </div>
+                <div class="listing-info-value">
+                    <h5>{{listing.creator}}</h5>
+                </div>
+            </div>
+            <div class = "listing-row">
+                <div class="listing-info-label">
+                    <h5>Current Bid:</h5>
+                </div>
+                <div class="listing-info-value">
+                    <h5>{{listing.price|money_format}}</h5>
+                </div>
+            </div>
+            <div class="listing-row">
+                <div class="listing-info-label">
+                    <h5>Posted on:</h5>
+                </div>
+                <div class="listing-info-value">
+                    <h5>{{listing.date}}</h5>
+                </div>
+            </div>  
+        </div>
+    </div>
+</div>

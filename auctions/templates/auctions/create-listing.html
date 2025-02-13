@@ -15,6 +15,13 @@
     {% csrf_token %}
     {% for field in ListingForm %}
         <div class = "form-group">
+            {% if field.errors %}
+                {% for error in field.errors %}
+                <div class="error">
+                    <p>{{error}}</p>
+                </div>
+                {% endfor %}
+            {% endif %}
             {{field}}
         </div>
     {% endfor %}
