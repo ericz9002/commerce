@@ -7,11 +7,19 @@
     <script>
         //script for adding comments
         document.addEventListener('DOMContentLoaded', ()=>{
-            function sleep(ms) {
-                const start = Date.now();
-                while (Date.now() - start < ms) {
-                    // Busy-waiting: Blocks execution
-                }
+            function delete_comment(csrf_token, id) {
+                console.log("called delete_comment func");
+                const request = new Request("{%url 'delete_comment' %}", {
+                    method: "DELETE",
+                    headers: {'X-CSRFToken': csrf_token},
+                    body: JSON.stringify({"comment_id": id})
+                });
+                fetch(request)
+                .then((response) => {return response.json()})
+                .then((data)=>{
+                    document.querySelector(`#comment-${data["comment_id"]}`).parentElement.remove();
+                    console.log(`successfully removed comment ${data["comment_id"]}`);
+                })
             }
 
             const comment_input = document.querySelector('#comment-input');
@@ -43,21 +51,9 @@
                         new_comment.innerHTML = data;
                         const delete_icon = new_comment.querySelector(".delete-comment, .icon");
                         const id = delete_icon.parentElement.parentElement.id.slice(8);
+                        const csrf_token = delete_icon.previousElementSibling.value;
                         comments_list.appendChild(new_comment);
-                        delete_icon.addEventListener("click", (event)=>{
-                            const csrf_token = delete_icon.previousElementSibling.value;
-                            const request = new Request("{%url 'delete_comment' %}", {
-                                method: "DELETE",
-                                headers: {'X-CSRFToken': csrf_token},
-                                body: JSON.stringify({"comment_id": id})
-                            });
-                            fetch(request)
-                            .then((response) => {return response.json()})
-                            .then((data)=>{
-                                document.querySelector(`#comment-${data["comment_id"]}`).parentElement.remove();
-                                console.log(`successfully removed comment ${data["comment_id"]}`);
-                            })
-                        })
+                        delete_icon.addEventListener("click", () => delete_comment(csrf_token, id));
                         console.log(`successfully added comment ${id}`);
                     })
                     .catch(error => {
