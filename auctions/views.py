@@ -13,12 +13,13 @@ import pdb
 from .serializers import ListingSerializer
 from rest_framework.renderers import JSONRenderer
 from django.core.exceptions import ValidationError
+import datetime
 
 
 def index(request):
-    print(Listing.objects.all())
+    print(Listing.objects.filter(is_active=True))
     return render(request, "auctions/index.html", {
-        "is_active": True, "listings": Listing.objects.all(), "place_bid": True
+        "is_active": True, "listings": Listing.objects.filter(is_active=True), "place_bid": True
     })
 
 
@@ -76,7 +77,7 @@ def register(request):
 
 def inactive_listings(request):
     listings = Listing.objects.filter(is_active=False)
-    return render(request, "auctions/index.html", {"active": False, "listings": listings, "place_bid":False})
+    return render(request, "auctions/index.html", {"active": False, "listings": listings, "place_bid":True})
 
 def inactive_listing(request, listing_id):
     pass
@@ -155,11 +156,12 @@ def bid(request, username, listing_id):
     listing = get_object_or_404(Listing, id=listing_id, creator__username=username)
     serialized_listing = ListingSerializer(listing)
     serialized_listing = json.dumps(serialized_listing.data)
+    bids = Bid.objects.filter(listing=listing)
     if request.method == "POST":
         form = BidForm(request.POST)
         if form.is_valid():
             bid = Bid()
-            bid.user = request.user
+            bid.author = request.user
             bid.listing = Listing.objects.get(title=listing.title, creator__username=username)
             bid.amount = form.cleaned_data["amount"]
             try:
@@ -167,15 +169,26 @@ def bid(request, username, listing_id):
             except ValidationError as e:
                 form.add_error("amount", e)
                 return render(request, "auctions/bid.html", {
-                    "listing":listing, "serialized_listing": serialized_listing, "place_bid":False, "BidForm":form, "user":request.user
+                    "listing":listing, "serialized_listing": serialized_listing, "place_bid":False, 
+                    "BidForm":form, "user":request.user, "bids":bids, "close_date":listing.close_date
                 })
         return HttpResponseRedirect(reverse("bid", args=(username, listing.id)))
     else:
-        comments = Comment.objects.filter(listing=listing)
         print(f"serialized_listing is of type {type(serialized_listing)} and has value {serialized_listing}")
         return render(request, "auctions/bid.html", {
-            "listing":listing, "serialized_listing": serialized_listing, "place_bid":False, "BidForm":BidForm(), "user":request.user
+            "listing":listing, "serialized_listing": serialized_listing, "place_bid":False, "BidForm":BidForm(), 
+            "user":request.user, "bids":bids, "close_date":listing.close_date
         })
+    
+def close(request, username, listing_id):
+    if request.method == "POST":
+        listing = get_object_or_404(Listing, id=listing_id, creator__username=username)
+        listing.is_active = False
+        listing.close_date = datetime.datetime.now()
+        listing.save()
+        return HttpResponseRedirect(reverse("listing", args=(username, listing_id)))
+    else:
+        return JsonResponse({"error": "Method not allowed, make sure you make a post request"}, status=405)
 
 def watchlist(request, username):
     return HttpResponse("watchlist")

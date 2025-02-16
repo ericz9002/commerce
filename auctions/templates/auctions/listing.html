@@ -63,7 +63,7 @@
                         console.log(`Error in fetch when adding comment: ${error}`);
                     })   
             });
-
+            //script to submit comment 
             comment_input.addEventListener('keydown', (event)=>{
                 if(event.key === 'Enter'){
                     event.preventDefault();
@@ -72,7 +72,7 @@
                     comment_input.blur();
                 }
             })
-
+            //script to delete comments
             document.querySelectorAll(".delete-comment").forEach((delete_icon)=>{
                 const csrf_token = delete_icon.previousElementSibling.value;
                 const id = delete_icon.parentElement.parentElement.id.slice(8)

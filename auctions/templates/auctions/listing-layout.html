@@ -16,8 +16,20 @@
             </button>
             {% if place_bid %}
                 <a class = "button-style" href="{%url 'bid' listing.creator listing.id%}">
-                    Place Bid
+                    {% if listing.is_active %}
+                        Place Bid
+                    {% else %}
+                        View Bids
+                    {% endif %}
                 </a>
+            {% endif %}
+            {% if listing.creator == user and listing.is_active == True%}
+                <form method="post" action="{%url 'close' listing.creator listing.id%}">
+                    {%csrf_token%}
+                    <button type="submit" class = "button-style">
+                        Close Listing
+                    </button>
+                </form>
             {% endif %}
         </div>
     </div>

@@ -61,3 +61,7 @@ a.button-style:hover {
 button:hover {
     background-color: rgb(183, 183, 183);
 }
+
+.fill{
+    flex:1;
+}

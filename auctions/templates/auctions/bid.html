@@ -20,5 +20,18 @@
         {{field}}
     {% endfor %}
 </form>
-{% include "auctions/listing-layout.html" with listing=listing link=False%}
+{% include "auctions/listing-layout.html" with listing=listing link=True%}
+<hr>
+{% for bid in bids %}
+    {% include "auctions/bid_layout.html" with bid=bid%}
+{% endfor %}
+
+
+{% if listing.is_active == False %}
+    <div class="bid-end">
+        <h5>{{listing.creator}} has closed this auction</h5>
+        <div class="fill"></div>
+        <h5>{{listing.close_date}}</h5>
+    </div>
+{% endif %}
 {%endblock%}

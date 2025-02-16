@@ -40,7 +40,7 @@ class Listing(models.Model):
 
 class Bid(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     amount = models.FloatField()
     date = models.DateTimeField(auto_now_add=True)
@@ -48,7 +48,10 @@ class Bid(models.Model):
     def save(self, *args, **kwargs):
         if self.amount <= self.listing.price:
             raise ValidationError("Bid amount must be greater than or equal to the current price")
-        Listing.objects.filter(pk=self.listing.id).update(price=self.amount)
+        if self.listing.is_active == False:
+            raise ValidationError("Listing is closed")
+        listing = Listing.objects.filter(pk=self.listing.id)
+        listing.update(price=self.amount)
         return super().save(*args, **kwargs)
 
 class Comment(models.Model):
