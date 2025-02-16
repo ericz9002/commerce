@@ -4,7 +4,7 @@
     <div class = "listing-header">
         <div class="listing-title">
             {% if link %}
-                <h3><a href="{%url 'listing' listing.creator listing.title%}">{{listing.title}}</a></h3>
+                <h3><a href="{%url 'listing' listing.creator listing.id %}">{{listing.title}}</a></h3>
             {% else %}
                 <h3>{{listing.title}}</h3>
             {% endif %}
@@ -15,7 +15,7 @@
                 Add to Watchlist
             </button>
             {% if place_bid %}
-                <a class = "button-style" href="{%url 'bid' listing.creator listing.title%}">
+                <a class = "button-style" href="{%url 'bid' listing.creator listing.id%}">
                     Place Bid
                 </a>
             {% endif %}
@@ -27,7 +27,7 @@
     <div class="listing-body">
         <div class = "listing-image">
             {% if link %}
-                <a href="{%url 'listing' listing.creator listing.title%}">
+                <a href="{%url 'listing' listing.creator listing.id%}">
                     <img src="{{listing.image}}" alt="image not found">
                 </a>
             {% else %}

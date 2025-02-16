@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block body %}
-<form id="bid-form" method="post" action = "{% url 'bid' listing.creator listing.title %}">
+<form id="bid-form" method="post" action = "{% url 'bid' listing.creator listing.id %}">
     {% csrf_token %}
     {% for field in BidForm %}
         {% if field.errors %}
