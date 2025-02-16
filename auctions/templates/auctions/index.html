@@ -6,14 +6,22 @@
     <link href="{% static 'auctions/listings.css' %}"  rel="stylesheet">
 {% endblock %}
 {% block body %}
-    <h2>Active Listings</h2>
+    {% if is_active %}
+        <h2>Active Listings</h2>
+    {% else %}
+        <h2>Inactive Listings</h2>
+    {% endif %}
     <ul class = "listings">
         {%for listing in listings%}
         <li>
             {% include "auctions/listing-layout.html" with listing=listing link=True%}
         </li>
         {%empty%}
-        <li>No Active Listings</li>
+        {% if is_active %}
+            <li>No Active Listings</li>
+        {% else %}
+            <li>No Inactive Listings</li>
+        {% endif %}
         {%endfor%}
     </ul>
 {% endblock %}

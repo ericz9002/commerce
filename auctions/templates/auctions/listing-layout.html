@@ -56,9 +56,19 @@
                     <h5>Posted on:</h5>
                 </div>
                 <div class="listing-info-value">
-                    <h5>{{listing.date}}</h5>
+                    <h5>{{listing.create_date}}</h5>
                 </div>
             </div> 
+            {% if listing.is_active == False %}
+                <div class="listing-row">
+                    <div class="listing-info-label">
+                        <h5>Ended on:</h5>
+                    </div>
+                    <div class="listing-info-value">
+                        <h5>{{listing.close_date}}</h5>
+                    </div>
+                </div> 
+            {% endif %}
             <div class="listing-row">
                 <div class="listing-info-label">
                     <h5>Is Active:</h5>

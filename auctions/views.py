@@ -18,7 +18,7 @@ from django.core.exceptions import ValidationError
 def index(request):
     print(Listing.objects.all())
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all(), "place_bid": True
+        "is_active": True, "listings": Listing.objects.all(), "place_bid": True
     })
 
 
@@ -76,7 +76,7 @@ def register(request):
 
 def inactive_listings(request):
     listings = Listing.objects.filter(is_active=False)
-    return render(request, "auctions/index.html", {"listings": listings, "place_bid":False})
+    return render(request, "auctions/index.html", {"active": False, "listings": listings, "place_bid":False})
 
 def inactive_listing(request, listing_id):
     pass
@@ -114,7 +114,8 @@ def listing(request, username, listing_id):
     comments = Comment.objects.filter(listing=listing)
     print(f"serialized_listing is of type {type(serialized_listing)} and has value {serialized_listing}")
     return render(request, "auctions/listing.html", {
-        "listing":listing, "serialized_listing": serialized_listing, "place_bid": True, "comments":comments, "CommentForm": CommentForm(), "user":request.user
+        "listing":listing, "serialized_listing": serialized_listing, "place_bid": True, "comments":comments, 
+        "CommentForm": CommentForm(), "user":request.user
     })
     
 def add_comment(request):

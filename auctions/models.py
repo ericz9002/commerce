@@ -26,7 +26,8 @@ class Listing(models.Model):
     description = models.TextField()
     price = models.FloatField()
     image = models.URLField()
-    date = models.DateTimeField(auto_now_add=True)
+    create_date = models.DateTimeField(auto_now_add=True)
+    close_date = models.DateTimeField(null=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -35,7 +36,7 @@ class Listing(models.Model):
         ]
 
     def __str__(self):
-        return f"creator: {self.creator}, title: {self.title}, category: {self.category}, description: {self.description}, price: {self.price}, image: {self.image}, date: {self.date}, is_active: {self.is_active}"
+        return f"creator: {self.creator}, title: {self.title}, category: {self.category}, description: {self.description}, price: {self.price}, image: {self.image}, creation_date: {self.create_date}, close_date: {self.close_date}, is_active: {self.is_active}"
 
 class Bid(models.Model):
     id = models.AutoField(primary_key=True)
