@@ -1,0 +1,24 @@
+{%extends "auctions/layout.html"%}
+{%load static%}
+{% load custom_filters %}
+{% block extra_links %}
+    <link href="{% static 'auctions/listings.css' %}"  rel="stylesheet">
+    <link href="{% static 'auctions/bid.css' %}"  rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<form id="bid-form" method="post" action = "{% url 'bid' listing.creator listing.title %}">
+    {% csrf_token %}
+    {% for field in BidForm %}
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <div class="error">
+                    <p>{{error}}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+        {{field}}
+    {% endfor %}
+</form>
+{% include "auctions/listing-layout.html" with listing=listing link=False%}
+{%endblock%}

@@ -14,9 +14,11 @@
                 <img src = "{% static 'auctions/green-add.png' %}" class = 'icon'>
                 Add to Watchlist
             </button>
-            <button>
-                Place bid
-            </button>
+            {% if place_bid %}
+                <a class = "button-style" href="{%url 'bid' listing.creator listing.title%}">
+                    Place Bid
+                </a>
+            {% endif %}
         </div>
     </div>
     <div class="listing-description">
@@ -56,7 +58,15 @@
                 <div class="listing-info-value">
                     <h5>{{listing.date}}</h5>
                 </div>
-            </div>  
+            </div> 
+            <div class="listing-row">
+                <div class="listing-info-label">
+                    <h5>Is Active:</h5>
+                </div>
+                <div class="listing-info-value">
+                    <h5>{{listing.is_active}}</h5>
+                </div>
+            </div> 
         </div>
     </div>
 </div>

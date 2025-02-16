@@ -9,7 +9,6 @@
 }
 
 .listing-title{
-    padding-left:3%;
     flex:1;
 }
 
@@ -21,13 +20,7 @@
     flex:1;
 }
 
-.header-buttons button{
-    background-color: rgb(240,240,240);
-}
 
-.header-buttons button:hover{
-    background-color: rgb(183, 183, 183);
-}
 
 
 .listing-body{
@@ -67,9 +60,6 @@
     color: black;
 }
 
-.listing-description{
-    padding-left:3%;
-}
 
 .listing-description p{
     color: black;

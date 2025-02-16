@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .forms import ListingForm, CommentForm
+from .forms import ListingForm, CommentForm, BidForm
 from django.shortcuts import get_object_or_404
 import json
 from django.http import JsonResponse
@@ -12,12 +12,13 @@ from .models import User, Listing, Bid, Comment, Category
 import pdb
 from .serializers import ListingSerializer
 from rest_framework.renderers import JSONRenderer
+from django.core.exceptions import ValidationError
 
 
 def index(request):
     print(Listing.objects.all())
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all()
+        "listings": Listing.objects.all(), "place_bid": True
     })
 
 
@@ -72,6 +73,15 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+
+def inactive_listings(request):
+    listings = Listing.objects.filter(is_active=False)
+    return render(request, "auctions/index.html", {"listings": listings, "place_bid":False})
+
+def inactive_listing(request, listing_id):
+    pass
+
+
 @login_required 
 def create_listing(request):
     print(f"in create_listing, request.method is {request.method}")
@@ -119,7 +129,7 @@ def listing(request, username, title):
     else:
         print(f"serialized_listing is of type {type(serialized_listing)} and has value {serialized_listing}")
         return render(request, "auctions/listing.html", {
-            "listing":listing, "serialized_listing": serialized_listing, "comments":comments, "CommentForm": CommentForm(), "user":request.user
+            "listing":listing, "serialized_listing": serialized_listing, "place_bid": True, "comments":comments, "CommentForm": CommentForm(), "user":request.user
         })
     
 def add_comment(request):
@@ -154,7 +164,32 @@ def delete_comment(request):
         return JsonResponse({"comment_id": id, "message": "Comment deleted successfully."}, status=200)
     else:
         return JsonResponse({"error": "You are not authorized to delete this comment."}, status=403)
-    
+
+def bid(request, username, title):
+    listing = get_object_or_404(Listing, title=title, creator__username=username)
+    serialized_listing = ListingSerializer(listing)
+    serialized_listing = json.dumps(serialized_listing.data)
+    if request.method == "POST":
+        form = BidForm(request.POST)
+        if form.is_valid():
+            bid = Bid()
+            bid.user = request.user
+            bid.listing = Listing.objects.get(title=title, creator__username=username)
+            bid.amount = form.cleaned_data["amount"]
+            try:
+                bid.save()
+            except ValidationError as e:
+                form.add_error("amount", e)
+                return render(request, "auctions/bid.html", {
+                    "listing":listing, "serialized_listing": serialized_listing, "place_bid":False, "BidForm":form, "user":request.user
+                })
+        return HttpResponseRedirect(reverse("bid", args=(username, title)))
+    else:
+        comments = Comment.objects.filter(listing=listing)
+        print(f"serialized_listing is of type {type(serialized_listing)} and has value {serialized_listing}")
+        return render(request, "auctions/bid.html", {
+            "listing":listing, "serialized_listing": serialized_listing, "place_bid":False, "BidForm":BidForm(), "user":request.user
+        })
 
 def watchlist(request, username):
     return HttpResponse("watchlist")

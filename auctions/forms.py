@@ -15,7 +15,7 @@ class ListingForm(ModelForm):
         print(f"creator is {self.cleaned_data.get('self.user')}")
         try:
             Listing.objects.get(title=title, creator__username=self.user.username)
-            raise forms.ValidationError([forms.ValidationError("Title already exists."), forms.ValidationError("Another error")])
+            raise forms.ValidationError(forms.ValidationError("Title already exists."))
         except Listing.DoesNotExist:
             print(f"passed clean title check1")   
             pass  
@@ -47,3 +47,18 @@ class CommentForm(ModelForm):
         widgets = {
             "comment": forms.Textarea(attrs={"id": "comment-input", "class": "form-control", "placeholder": "Add comment", "rows":"4"}),
         }
+
+class BidForm(ModelForm):
+    amount = forms.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        widget=forms.NumberInput(attrs={
+            'id': 'amount-input',
+            'class': 'form-control',
+            'placeholder': 'Enter bid amount here'
+        })
+    )
+    class Meta:
+        model = Bid
+        fields=["amount"]
+        labels = {"amount": ""}

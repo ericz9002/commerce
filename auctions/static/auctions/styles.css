@@ -17,3 +17,47 @@ body {
     height:20px;
     width:auto;
 }
+
+.body-container{
+    margin-left:10px;
+}
+
+.inline-block{
+    display: inline-block;
+}
+
+a.button-style {
+    appearance: auto;
+    text-rendering: auto;
+    color: buttontext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: flex;
+    text-align: center;
+    cursor: default;
+    box-sizing: border-box;
+    background-color: rgb(240,240,240);
+    margin: 0em;
+    padding-block: 1px;
+    padding-inline: 6px;
+    border-width: 2px;
+    border-style: outset;
+    border-color: buttonborder;
+    border-image: initial;
+    align-items:center;
+    text-decoration:none;
+}
+
+a.button-style:hover {
+    text-decoration: none; /* Ensures no underline on hover */
+    background-color: rgb(183, 183, 183);
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: rgb(183, 183, 183);
+}

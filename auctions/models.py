@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class User(AbstractUser):
@@ -42,6 +43,12 @@ class Bid(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     amount = models.FloatField()
     date = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.amount <= self.listing.price:
+            raise ValidationError("Bid amount must be greater than or equal to the current price")
+        Listing.objects.filter(pk=self.listing.id).update(price=self.amount)
+        return super().save(*args, **kwargs)
 
 class Comment(models.Model):
     id = models.AutoField(primary_key=True)
