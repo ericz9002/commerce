@@ -10,10 +10,19 @@
             {% endif %}
         </div>
         <div class="header-buttons">
-            <button>
-                <img src = "{% static 'auctions/green-add.png' %}" class = 'icon'>
-                Add to Watchlist
-            </button>
+            {% if listing.in_watchlist %}
+                <input type="hidden" class="csrf-token" value="{{csrf_token}}">
+                <button class="remove-watchlist" data-user="{{user}}" data-listing="{{listing.id}}">
+                    <img src = "{% static 'auctions/red_minus.png' %}" class = 'icon'>
+                    Remove from Watchlist
+                </button>  
+            {% else %}
+                <input type="hidden" class="csrf-token" value="{{csrf_token}}">
+                <button class="add-watchlist" data-user="{{user}}" data-listing="{{listing.id}}">
+                    <img src = "{% static 'auctions/green_add.png' %}" class = 'icon'>
+                    Add to Watchlist
+                </button>
+            {% endif %}
             {% if place_bid %}
                 <a class = "button-style" href="{%url 'bid' listing.creator listing.id%}">
                     {% if listing.is_active %}

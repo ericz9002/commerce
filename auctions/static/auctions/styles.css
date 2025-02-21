@@ -2,15 +2,70 @@ body {
     padding: 10px;
 }
 
+
+@keyframes hide{
+    0% {
+        margin-bottom:10px;
+        max-height: 100px;
+        transform: translateX(0);
+    }
+
+    70% {
+        margin-bottom:10px;
+        max-height:100px;
+        transform: translateX(100vw);
+    }
+
+    100% {
+        margin-bottom:0px;
+        max-height:0px;
+        transform: translateX(100vw);
+    }
+}
+.notification {
+    display: flex;
+    flex-wrap:wrap;
+    align-items: start;
+    animation-name: hide;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-play-state: paused;
+}
+
+.notification p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal; /* Ensures text wraps properly */
+    flex: 1; /* Allows paragraph to take available space */
+    min-width: 0; /* Prevents flexbox from forcing overflow */
+}
+
+
+.notification .icon{
+    padding-top:5px;
+    padding-right:2px;
+}
+.success {
+    background-color: rgb(180, 255, 180);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding-right: 3px;
+}
+
 .error {
     background-color: rgb(255, 180, 180);
     border-radius: 10px;
     margin-bottom: 10px;
 }
 
-.error p{
+.error p, .success p{
     padding-left: 10px;
     margin: 0;
+}
+
+.delete-icon{
+    height:20px;
+    width:auto;
 }
 
 .icon{

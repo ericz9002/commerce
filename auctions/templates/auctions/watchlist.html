@@ -1,0 +1,64 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block extra_links %}
+    <link href="{% static 'auctions/listings.css' %}"  rel="stylesheet">
+    <script type="module">
+        import {delete_notification} from '../../static/auctions/delete_notification.js'
+        document.addEventListener('DOMContentLoaded', ()=>{
+            document.querySelectorAll('.remove-watchlist').forEach((button)=>{
+                button.addEventListener('click', ()=>{
+                    const csrf_token = button.previousElementSibling.value
+                    const request = new Request("/remove_watchlist", {
+                        method: 'POST',
+                        headers: {'X-CSRFToken': csrf_token},
+                        body: JSON.stringify({"listing_id": button.dataset.listing, "listing_creator":button.dataset.user}),
+                        credentials: "include",
+                    });
+                    console.log("request body is", request.body)
+                    fetch(request)
+                    .then((response)=>{
+                        return response.text()
+                    })
+                    .then((data)=>{
+                        let notification = document.createElement('div')
+                        notification.innerHTML = data
+                        notification = notification.firstElementChild
+                        if(notification.classList.contains('error')){
+                            const listing_ele = button.parentElement.parentElement
+                            const delete_icon = notification.querySelector(".delete-icon")
+                            delete_icon.addEventListener('click', delete_notification)
+                            listing_ele.insertAdjacentElement('beforebegin', notification)
+                        }
+                        else{
+                            console.log('button is', button)
+                            const listing = button.parentElement.parentElement.parentElement
+                            console.log('listing is', listing)
+                            listing.style.animationPlayState = 'running'
+                            listing.addEventListener('animationend', ()=>{
+                                listing.remove()
+                            })
+                        }
+                    })
+                    .catch((error)=>{
+                        console.log('error is', error)
+                    })
+                })
+            })
+        })
+        
+    </script>
+{% endblock %}
+{% block body %}
+    <h2>Watchlist</h2>
+    <ul class = "listings">
+        {%for listing in listings%}
+        <li>
+            {% include "auctions/listing-layout.html" with listing=listing link=True%}
+        </li>
+        {%empty%}
+        <li>No Listings in Watchlist</li>
+        {%endfor%}
+    </ul>
+{% endblock %}

@@ -4,6 +4,32 @@
     max-width: 1200px;
 }
 
+@keyframes hide2{
+    0% {
+        margin-bottom:10px;
+        max-height: 1000px;
+        transform: translateX(0);
+    }
+
+    70% {
+        margin-bottom:10px;
+        max-height:1000px;
+        transform: translateX(100vw);
+    }
+
+    100% {
+        margin-bottom:0px;
+        max-height:0px;
+        transform: translateX(100vw);
+    }
+}
+.listing-ele{
+    animation-name: hide2;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-play-state: paused;
+}
+
 .listing-header{
     display:flex;
 }
@@ -22,6 +48,8 @@
 
 .header-buttons button{
     height:100%;
+    display:flex;
+    align-items:center;
 }
 
 

@@ -4,22 +4,25 @@
 {% block extra_links %}
     <link href="{% static 'auctions/listings.css' %}"  rel="stylesheet">
     <link href="{% static 'auctions/bid.css' %}"  rel="stylesheet">
+    <script type="module" src="{% static 'auctions/watchlist.js' %}"></script>
 {% endblock %}
 
 {% block body %}
-<form id="bid-form" method="post" action = "{% url 'bid' listing.creator listing.id %}">
-    {% csrf_token %}
-    {% for field in BidForm %}
-        {% if field.errors %}
-            {% for error in field.errors %}
-                <div class="error">
-                    <p>{{error}}</p>
-                </div>
-            {% endfor %}
-        {% endif %}
-        {{field}}
-    {% endfor %}
-</form>
+{% if listing.is_active == True %}
+    <form id="bid-form" method="post" action = "{% url 'bid' listing.creator listing.id %}">
+        {% csrf_token %}
+        {% for field in BidForm %}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <div class="error">
+                        <p>{{error}}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {{field}}
+        {% endfor %}
+    </form>
+{% endif %}
 {% include "auctions/listing-layout.html" with listing=listing link=True%}
 <hr>
 {% for bid in bids %}

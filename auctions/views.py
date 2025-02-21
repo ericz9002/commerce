@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -17,9 +17,15 @@ import datetime
 
 
 def index(request):
-    print(Listing.objects.filter(is_active=True))
+    active_listings = Listing.objects.filter(is_active=True)
+    if request.user.is_authenticated:
+        for active_listing in active_listings:
+            if active_listing in request.user.watchList.all():
+                active_listing.in_watchlist = True
+            else:
+                active_listing.in_watchlist = False
     return render(request, "auctions/index.html", {
-        "is_active": True, "listings": Listing.objects.filter(is_active=True), "place_bid": True
+        "is_active": True, "listings": active_listings, "place_bid": True
     })
 
 
@@ -76,8 +82,14 @@ def register(request):
 
 
 def inactive_listings(request):
-    listings = Listing.objects.filter(is_active=False)
-    return render(request, "auctions/index.html", {"active": False, "listings": listings, "place_bid":True})
+    inactive_listings = Listing.objects.filter(is_active=False)
+    if request.user.is_authenticated:
+        for inactive_listing in inactive_listings:
+            if inactive_listing in request.user.watchList.all():
+                inactive_listing.in_watchlist = True
+            else:
+                inactive_listing.in_watchlist = False
+    return render(request, "auctions/index.html", {"active": False, "listings": inactive_listings, "place_bid":True})
 
 def inactive_listing(request, listing_id):
     pass
@@ -110,9 +122,13 @@ def create_listing(request):
 def listing(request, username, listing_id):
     listing = get_object_or_404(Listing, id=listing_id, creator__username=username)
     serialized_listing = ListingSerializer(listing)
-    #serialized_listing = JSONRenderer().render(serialized_listing.data)
     serialized_listing = json.dumps(serialized_listing.data)
     comments = Comment.objects.filter(listing=listing)
+    if request.user.is_authenticated:
+        if listing in request.user.watchList.all():
+            listing.in_watchlist = True
+        else:
+            listing.in_watchlist = False
     print(f"serialized_listing is of type {type(serialized_listing)} and has value {serialized_listing}")
     return render(request, "auctions/listing.html", {
         "listing":listing, "serialized_listing": serialized_listing, "place_bid": True, "comments":comments, 
@@ -154,9 +170,15 @@ def delete_comment(request):
 
 def bid(request, username, listing_id):
     listing = get_object_or_404(Listing, id=listing_id, creator__username=username)
+    if request.user.is_authenticated:
+        if listing in request.user.watchList.all():
+            listing.in_watchlist = True
+        else:
+            listing.in_watchlist = False
     serialized_listing = ListingSerializer(listing)
     serialized_listing = json.dumps(serialized_listing.data)
     bids = Bid.objects.filter(listing=listing)
+    in_watchlist = listing in request.user.watchList.all()
     if request.method == "POST":
         form = BidForm(request.POST)
         if form.is_valid():
@@ -190,5 +212,53 @@ def close(request, username, listing_id):
     else:
         return JsonResponse({"error": "Method not allowed, make sure you make a post request"}, status=405)
 
+def add_watchlist(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            try:
+                listing = get_object_or_404(Listing, id=data['listing_id'])
+            except Http404:
+                msg = f"Could not find listing with id {data['listing_id']}"
+                return render(request, "auctions/notification-layout.html", {"success": False, "notification_msg": msg})
+            if listing in request.user.watchList.all():
+                msg = f"{listing.title} is already in your watchlist"
+                return render(request, "auctions/notification-layout.html", {"success": False, "notification_msg": msg})
+            else:
+                request.user.watchList.add(listing)
+                msg = f"successfully added {listing.title} to watchlist"
+                return render(request, "auctions/notification-layout.html", {"success": True, "notification_msg": msg})
+        except json.JSONDecodeError:
+            msg = f"Could not decode request body, Invalid JSON"
+            return render(request, "auctions/notification-layout.html", {"success": False, "notification_msg": msg})
+    else:
+        return JsonResponse({"error": "Method not allowed, make sure you make a post request"}, status=405)
+    
+def remove_watchlist(request):
+    if request.method == "POST":
+        try: 
+            data = json.loads(request.body)
+            try:
+                listing = get_object_or_404(Listing, id=data['listing_id'])
+            except Http404:
+                msg = f"Could not find listing with id {data['listing_id']}"
+                return render(request, "auctions/notification-layout.html", {"success": False, "notification_msg": msg})     
+            if listing not in request.user.watchList.all():
+                msg = f"Could not remove {listing.title} because {listing.title} is not in your watchlist"
+                return render(request, "auctions/notification-layout.html", {"success": False, "notification_msg": msg})
+            else:
+                request.user.watchList.remove(listing)
+                msg = f"successfully removed {listing.title} from your watchlist"
+                return render(request, "auctions/notification-layout.html", {"success": True, "notification_msg": msg})       
+        except json.JSONDecodeError:
+            msg = f"Could not decode request body, Invalid JSON"
+            return render(request, "auctions/notification-layout.html", {"success": False, "notification_msg": msg})
+    else:
+        return JsonResponse({"error": "Method not allowed, make sure you make a post request"}, status=405)
+
 def watchlist(request, username):
-    return HttpResponse("watchlist")
+    listings = request.user.watchList.all()
+    for listing in listings:
+        listing.in_watchlist = True
+
+    return render(request, "auctions/watchlist.html", {"user":request.user, "listings":listings})

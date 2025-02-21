@@ -1,0 +1,12 @@
+{% load static %}
+{% if success %}
+    <div class="notification success">
+        <p>{{notification_msg}}</p>
+        <img src="{%static 'auctions/gray_x.png'%}" class="delete-icon" alt="delete comment" draggable="false">
+    </div>
+{% else %}
+    <div class="notification error">
+        <p>{{notification_msg}}</p>
+        <img src="{%static 'auctions/gray_x.png'%}" class="delete-icon" alt="delete comment" draggable="false">
+    </div>
+{% endif %}
