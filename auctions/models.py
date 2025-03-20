@@ -6,10 +6,6 @@ from django.core.exceptions import ValidationError
 class User(AbstractUser):
     watchList = models.ManyToManyField('Listing', related_name="users")
 
-class User2(models.Model):
-    username = models.CharField(max_length=64, primary_key=True, unique=True)
-    password = models.CharField(max_length=64)
-
 
 class Category(models.Model):
     id = models.AutoField(primary_key=True)
@@ -53,6 +49,10 @@ class Bid(models.Model):
         listing = Listing.objects.filter(pk=self.listing.id)
         listing.update(price=self.amount)
         return super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"""Post {self.listing.title} by {self.listing.creator.username}, bid: {self.amount}, 
+            by {self.author.username}, date: {self.date}"""
 
 class Comment(models.Model):
     id = models.AutoField(primary_key=True)
@@ -60,4 +60,8 @@ class Comment(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     comment = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"""Post {self.listing.title} by {self.listing.creator.username}, comment: {self.comment}, 
+            by {self.author.username}, date: {self.date}"""
 

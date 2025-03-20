@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http40
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .forms import ListingForm, CommentForm, BidForm
+from .forms import ListingForm, CommentForm, BidForm, CategoryForm
 from django.shortcuts import get_object_or_404
 import json
 from django.http import JsonResponse
@@ -14,6 +14,7 @@ from .serializers import ListingSerializer
 from rest_framework.renderers import JSONRenderer
 from django.core.exceptions import ValidationError
 import datetime
+import requests
 
 
 def index(request):
@@ -134,7 +135,17 @@ def listing(request, username, listing_id):
         "listing":listing, "serialized_listing": serialized_listing, "place_bid": True, "comments":comments, 
         "CommentForm": CommentForm(), "user":request.user
     })
-    
+
+def listing_layout(request, username, listing_id):
+    print("here")
+    listing = get_object_or_404(Listing, id=listing_id, creator__username=username)
+    if listing.is_active:
+        place_bid = True
+    else:
+        place_bid = False
+    return render(request, "auctions/listing-layout.html", {"listing":listing, "place_bid": place_bid})
+
+
 def add_comment(request):
     try:
         data = json.loads(request.body)  # Parse JSON body
@@ -260,5 +271,20 @@ def watchlist(request, username):
     listings = request.user.watchList.all()
     for listing in listings:
         listing.in_watchlist = True
-
     return render(request, "auctions/watchlist.html", {"user":request.user, "listings":listings})
+
+def categories(request):
+    return render(request, "auctions/categories.html", {"CategoryForm": CategoryForm(), "categories":Category.objects.all()})
+
+def category_data(request, category):
+    listings = Listing.objects.filter(category__name=category, is_active=True)
+    html = ""
+    for listing in listings:
+        endpoint = reverse("listing_layout", args=[listing.creator.username, listing.id])
+        url = request.build_absolute_uri(endpoint)
+        response = requests.get(url)
+        if response.raise_for_status() == None:
+            html += response.text
+        else:
+            return JsonResponse({"error": "Failed to fetch listing data"}, status=response.status_code)
+    return HttpResponse(html)

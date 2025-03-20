@@ -62,3 +62,15 @@ class BidForm(ModelForm):
         model = Bid
         fields=["amount"]
         labels = {"amount": ""}
+
+class CategoryForm(ModelForm):
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        widget=forms.Select(attrs={"class": "form-control category", "id": "category-select"}),
+        label="Category"
+    )  
+
+    class Meta:
+        model = Category
+        fields = ["category"]
+        labels = {"category": ""}

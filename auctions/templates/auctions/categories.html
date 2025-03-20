@@ -1,0 +1,17 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block extra_links %}
+    <link href="{% static 'auctions/categories.css' %}"  rel="stylesheet">
+    <link href="{% static 'auctions/listings.css' %}" rel="stylesheet">
+    <script src="{% static 'auctions/categories.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+<form id = "category-form">
+    {% csrf_token %}
+    {{CategoryForm}}
+</form>
+<div class="error"></div>
+<div id="listings"></div>
+{% endblock %}
